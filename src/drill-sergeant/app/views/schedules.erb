@@ -1,0 +1,222 @@
+<%
+settings.dataStore[:schedules] ||= {}
+
+%><!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>Drill Sergeant Admin</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link href="/css/sb-admin.css" rel="stylesheet">
+
+    <!-- Morris Charts CSS -->
+    <link href="/css/plugins/morris.css" rel="stylesheet">
+
+    <!-- Custom Fonts -->
+    <link href="/font-awesome-4.1.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <div id="wrapper">
+
+        <!-- Navigation -->
+        <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-ex1-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/admin#">Drill Sergeant Admin</a>
+            </div>
+            <!-- Top Menu Items -->
+            <ul class="nav navbar-right top-nav">
+				<li class="dropdown">
+            		<a href="/"><i class="fa fa-fw fa-power-off"></i> Log Out</a>
+            	</li>
+            </ul>
+            
+            <!-- Sidebar Menu Items - These collapse to the responsive navigation menu on small screens -->
+            <div class="collapse navbar-collapse navbar-ex1-collapse">
+                <ul class="nav navbar-nav side-nav">
+                    <li>
+                        <a href="/admin#"><i class="fa fa-fw fa-dashboard"></i> Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="/admin/enlisted#"><i class="fa fa-fw fa-child"></i> Enlisted</a>
+                    </li>
+                    <li class="active">
+                        <a href="/admin/schedules#"><i class="fa fa-fw fa-clock-o"></i> Schedules</a>
+                    </li>
+
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </nav>
+
+        <div id="page-wrapper">
+
+            <div class="container-fluid">
+
+                <!-- Page Heading -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        <h1 class="page-header">
+                            Schedules <small>Where your orders become reality</small>
+                        </h1>
+                    </div>
+                </div>
+
+                <!-- /.row -->
+                <div class="row">
+
+                    <div class="col-lg-12">
+                        <div class="panel panel-primary">
+                            <div class="panel-heading">
+                                <div class="row">
+                                    <div class="col-xs-3">
+                                        <i class="fa fa-clock-o fa-5x"></i>
+                                    </div>
+                                    <div class="col-xs-9 text-right">
+                                        <div class="huge"><%= settings.dataStore[:schedules].size %></div>
+                                        <div>Schedules</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- /.row -->
+                <div class="row">
+                    <div class="col-lg-12">
+                        
+                    </div>
+                </div>
+
+                <!-- /.row -->
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="table-responsive">
+                            <table class="table table-bordered ">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Followers</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                <form role="form" action="/admin/schedules_do" method="post">
+                                <input type=hidden name="s" value="n">
+                                <tr class="success">
+                                    <td><input name='schedname' class="form-control" placeholder="new schedule name..." value=""></td>
+                                    <td> -- </td>
+                                    <td><button type="submit" class="btn btn-info">Create New Schedule</button></td>
+                                </tr>
+                                </form>
+                                <%
+                                settings.dataStore[:schedules].each_pair do |uid,data|
+                                    name = data[:displayName]
+                                    followers = GetScheduleFollowers(uid).size
+                                %>
+                                <tr class="">
+                                <td><%=h name %></td>
+                                <td><%=h followers %></td>
+                                <td><a href="/admin/schedules/<%=h uid %>" type="button" class="btn btn-primary">Edit</a></td>
+                                </tr>
+                                <%
+                                end
+                                # settings.dataStore[:clients].each_pair do |uid,data|
+                                #     name = uid
+                                #     name = data[:displayName] if data[:displayName]
+                                #     lastStart = data[:startTime]
+                                #     lastCheck = data[:lastCheckin]
+                                #     lastURL = data[:lastURL]
+                                #     screenSize = data[:screenSize]
+
+
+                                #     status = "normal"
+
+                                #     status = "idle" if(lastURL.end_with? settings.startPageURL)
+                                #     status = "fng" if(Time.at(Time.now - lastStart).to_i < 120) or name.eql? uid
+                                #     status = "awol" if(Time.at(Time.now - lastCheck).to_i > 90)
+                                #     status = "mia" if(Time.at(Time.now - lastCheck).to_i > 60*60)
+                                        
+
+                                #     state = :green if status == 'fng'
+                                #     state = :yellow if status == 'idle'
+                                #     state = :red if status == 'awol'
+                                #     state = :red if status == 'mia'
+
+                                #     concat '<tr class="success">' if state == :green
+                                #     concat '<tr class="warning">' if state == :yellow
+                                #     concat '<tr class="danger">' if state == :red
+                                #     concat "<td>#{name}</td>"
+                                #     concat "<td>#{status}</td>"
+                                #     concat "<td>#{screenSize}</td>"
+                                #     concat "<td>#{time_ago_in_words(lastStart)} ago</td>"
+                                #     concat "<td>#{time_ago_in_words(lastCheck)} ago</td>"
+                                #     concat %{<td><a href="/admin/enlisted/#{uid}" type="button" class="btn btn-primary">Edit</a></td>} if not status == 'mia'
+                                #     concat %{<td><a href="/admin/enlisted/#{uid}?s=d&rnd=#{SecureRandom.hex}" type="button" class="btn btn-danger">Delete</a></td>} if status == 'mia'
+                                    
+                                #     concat '</tr>'
+                                # end
+                                %>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- /.row -->
+
+            </div>
+            <!-- /.container-fluid -->
+
+        </div>
+        <!-- /#page-wrapper -->
+
+    </div>
+    <!-- /#wrapper -->
+
+    <!-- jQuery Version 1.11.0 -->
+    <script src="/js/jquery-1.11.0.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="/js/bootstrap.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    <script src="/js/plugins/morris/raphael.min.js"></script>
+    <script src="/js/plugins/morris/morris.min.js"></script>
+    <script src="/js/plugins/morris/morris-data.js"></script>
+
+</body>
+
+</html>
+

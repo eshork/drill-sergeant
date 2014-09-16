@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title>Drill Sergeant Client</title>
+        <link href="/css/cover.css" rel="stylesheet">
+        <style type="text/css">
+            body, html
+            {
+                margin: 0; padding: 0; height: 100%; overflow: hidden;
+            }
+
+            #content
+            {
+                position:absolute; left: 0; right: 0; bottom: 0; top: 0px;
+            }
+        </style>
+    </head>
+    <body>
+      
+      <div id="content">
+      
+         <!-- <iframe width="100%" height="100%" frameborder="0" src="/client_start.html" /> -->
+       <iframe id="display" width="100%" height="100%" frameborder="0" src="/client_start.html" >iframe...</iframe>
+       <div id="output" style="height: 25%; overflow: auto"></div>
+      </div>
+      
+      <script type="text/javascript">
+        if (!Date.now) {Date.now = function() { return new Date().getTime(); };}
+        var runningSince = Math.round(new Date().getTime() / 1000)
+
+        var wsUri = "ws://localhost:18080/clientcomm";
+        var curURL = "";
+        var output;
+        var auto_reconnect = true;
+        var reconnect_timeout = 60; //seconds
+        var ping_freq = 60; //seconds
+        var ping_drift = 60; //seconds
+        var readyToQuit = false;
+        function init() {
+          output = document.getElementById("output");
+          makeWebSocket();
+          startReconnects();
+        }
+
+        function makeWebSocket() { 
+          websocket = new WebSocket(wsUri);
+          websocket.onopen = function(evt) { onOpen(evt) };
+          websocket.onclose = function(evt) { onClose(evt) };
+          websocket.onmessage = function(evt) { onMessage(evt) };
+          websocket.onerror = function(evt) { onError(evt) };
+        }
+
+        var pingTimer;
+        function sendPings() {
+          stopPings();
+          dim = screen.width + "x" + screen.height;
+          cur = curURL;
+          if(cur == "") {
+            cur = document.getElementById("display").src;
+          }
+          uid = getCookie("clientUID");
+          doSend({event: 'ping', useragent: navigator.userAgent, display: dim, url: cur, uid: uid, since: runningSince});
+
+          nextPingDrift = Math.floor(Math.random() * ping_drift) + 1
+          nextPingDelaySec = ping_freq + nextPingDrift
+
+          pingTimer = window.setTimeout(sendPings,nextPingDelaySec*1000)
+        }
+        function stopPings() {
+          window.clearTimeout(pingTimer);
+        }
+        function handlePong(evt_data) {
+          clientuid = evt_data["uid"];
+          setCookie("clientUID", clientuid, 365)
+        }
+
+        function handleChangeDisplay(evt_data) {
+          url = evt_data["url"];
+          writeToScreen("Changing display to: " + url);
+          document.getElementById("display").src = url;
+          curURL = url;
+          sendPings();
+        }
+
+        var reconnectTimer;
+        function startReconnects() {
+          reconnectTimer = window.setTimeout(performReconnects,reconnect_timeout*1000)
+        }
+        function performReconnects() {
+          startReconnects();
+          if ( websocket.readyState != websocket.OPEN ) {
+            writeToScreen("Reconnecting now!");
+            makeWebSocket();
+          }
+        }        
+        function stopReconnects() {
+          window.clearTimeout(reconnectTimer);
+        }
+
+        function handleReload() {
+          location.reload();
+        }
+
+        function onOpen(evt) {
+          writeToScreen("CONNECTED");
+          sendPings();
+          //doSend({event: 'ping', some: 'data'});
+        }
+        function onClose(evt) {
+          stopPings();
+          if ( readyToQuit != true ) {
+            writeToScreen("DISCONNECTED - reconnecting...");
+          } else {
+            writeToScreen("DISCONNECTED - quitting");
+          }
+        }
+        function onMessage(evt) {
+          resp = JSON.parse(evt.data)
+          switch(resp['event']){
+            case "pong":
+              handlePong(resp['data']);
+              break;
+            case "reload":
+              handleReload(resp['data']);
+              break;
+            case "change_display":
+              handleChangeDisplay(resp['data']);
+              break;
+            default:
+              writeToScreen('<span style="color: blue;">UNKNOWN RESPONSE: ' + evt.data+'</span>');
+          }
+          //websocket.close();
+        }
+        function onError(evt) {
+          writeToScreen('<span style="color: red;">ERROR:</span> ' + evt.data);
+        }
+        function doSend(message) {
+          msg = JSON.stringify(message);
+          writeToScreen("SENT: " + msg);  websocket.send(msg);
+        }
+
+        function doShutdown() {
+          readyToQuit = true;
+          websocket.close();
+        }
+
+
+
+        function writeToScreen(message) {
+          // var pre = document.createElement("p");
+          // pre.style.wordWrap = "break-word";
+          // pre.innerHTML = message; output.appendChild(pre);
+        }
+        window.addEventListener("load", init, false);
+
+        function setCookie(cname, cvalue, exdays) {
+            var d = new Date();
+            d.setTime(d.getTime() + (exdays*24*60*60*1000));
+            var expires = "expires="+d.toUTCString();
+            document.cookie = cname + "=" + cvalue + "; " + expires;
+        }
+
+        function getCookie(cname) {
+            var name = cname + "=";
+            var ca = document.cookie.split(';');
+            for(var i=0; i<ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1);
+                if (c.indexOf(name) != -1) return c.substring(name.length, c.length);
+            }
+            return "";
+        }
+
+        function checkCookie() {
+            var user = getCookie("username");
+            if (user != "") {
+                alert("Welcome again " + user);
+            } else {
+                user = prompt("Please enter your name:", "");
+                if (user != "" && user != null) {
+                    setCookie("username", user, 365);
+                }
+            }
+        }
+
+      </script>
+    </body>
+</html>
