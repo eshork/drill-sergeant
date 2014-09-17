@@ -30,7 +30,7 @@ I'm sure someone wrote a Firefox plugin that already does this, but a) this is c
 * Go drink more a beverage you find refreshing for 10-15 minutes
 
 You now have a working Ubuntu 14.04 LTS development environment.
-You can start the app with: *'padrino -h 0.0.0.0 -p 18080'*
+You can start the app with: *'padrino start -h 0.0.0.0 -p 18080'*
   or some other appropriate variant that suits your needs
 
 
