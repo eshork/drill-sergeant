@@ -6,9 +6,11 @@ A centralized browser director for web-based dashboards.
 [Yes.](https://news.ycombinator.com/item?id=3067434)
 
 ### Why does this exist? ###
-After adopting dashing for generic dashboards at the day job, I found there were several features lacking that would have made it a more complete product, but they didn't quite fit into the loose and fast spirit of the project, so they wouldn't be good addons - this is one of those features.
+After adopting [dashing](http://dashing.io) for generic dashboards at the day job, I found there were several features lacking that would have made it a more complete product, but they didn't quite fit into the loose and fast spirit of the project, so they wouldn't be good addons - this is one of those features.
 
-This software will allow you to point an army of web browsers at a single url, and then assign them individual rotation schedules to flip through other various urls. I'm sure someone wrote a Firefox plugin that already does this, but a) this is centrally coordinated, so all your dashboards could update simultaneously (and let's face it, that's way sexier); and b) I had a free weekend.
+This software will allow you to point an army of web browsers at a single url, and then assign them individual rotation schedules to flip through other various urls - effectively giving you remote scheduling over the URLs that each browser display. We find this great for cycling the TVs on our campus through multiple dashboards - both dashing driven, and otherwise.
+
+I'm sure someone wrote a Firefox plugin that already does this, but a) this is centrally coordinated, so all your dashboards could update simultaneously (and let's face it, that's way sexier); and b) I had a free weekend.
 
 ### What am I looking at? ###
 * Ruby 2.1.2
